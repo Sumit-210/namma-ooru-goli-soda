@@ -14,6 +14,10 @@ function Products() {
     const { addToCart } =
         useContext(CartContext)
 
+    // CHANGE THIS TO YOUR BACKEND URL
+    const BASE_URL =
+        "http://localhost:8080"
+
     useEffect(() => {
 
         fetchProducts()
@@ -26,6 +30,8 @@ function Products() {
 
             const response =
                 await api.get("/products")
+
+            console.log(response.data)
 
             setProducts(response.data)
 
@@ -130,7 +136,7 @@ function Products() {
                             <div className="relative overflow-hidden">
 
                                 <img
-                                    src={`http://localhost:8080${product.imageUrl}`}
+                                    src={`${BASE_URL}${product.imageUrl}`}
                                     alt={product.name}
                                     className="
                                         w-full

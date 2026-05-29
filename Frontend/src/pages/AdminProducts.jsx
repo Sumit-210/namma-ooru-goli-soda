@@ -1,22 +1,25 @@
-import { useEffect, useState }
-from "react"
+import { useEffect, useState } from "react"
+import { Upload, Trash2, PackagePlus } from "lucide-react"
 
 import api from "../services/api"
 
 function AdminProducts() {
 
-    const [products, setProducts] =
-        useState([])
+    const [products, setProducts] = useState([])
 
-   const [formData, setFormData] =
-    useState({
-
+    const [formData, setFormData] = useState({
         name: "",
         description: "",
         flavor: "",
         price: "",
         imageUrl: ""
     })
+
+    const [preview, setPreview] = useState("")
+
+    // BACKEND URL
+    const BASE_URL =
+        "https://demotion-hastily-unable.ngrok-free.dev"
 
     useEffect(() => {
 
@@ -33,23 +36,68 @@ function AdminProducts() {
 
             setProducts(response.data)
 
-        } catch(error) {
+        } catch (error) {
 
             console.error(error)
+
         }
     }
 
     const handleChange = (e) => {
 
         setFormData({
-
             ...formData,
-
-            [e.target.name]:
-            e.target.value
+            [e.target.name]: e.target.value
         })
     }
 
+    // IMAGE UPLOAD
+    const handleImageUpload = async (e) => {
+
+        const file = e.target.files[0]
+
+        if (!file) return
+
+        // LOCAL PREVIEW
+        const localPreview =
+            URL.createObjectURL(file)
+
+        setPreview(localPreview)
+
+        const imageData = new FormData()
+
+        imageData.append("file", file)
+
+        try {
+
+            const response = await api.post(
+                "/upload",
+                imageData,
+                {
+                    headers: {
+                        "Content-Type":
+                            "multipart/form-data"
+                    }
+                }
+            )
+
+            const uploadedImagePath =
+                response.data
+
+            setFormData(prev => ({
+                ...prev,
+                imageUrl: uploadedImagePath
+            }))
+
+        } catch (error) {
+
+            console.error(error)
+
+            alert("Image upload failed")
+        }
+    }
+
+    // ADD PRODUCT
     const addProduct = async () => {
 
         try {
@@ -62,32 +110,31 @@ function AdminProducts() {
             fetchProducts()
 
             setFormData({
+                name: "",
+                description: "",
+                flavor: "",
+                price: "",
+                imageUrl: ""
+            })
 
-    name: "",
-    description: "",
-    flavor: "",
-    price: "",
-    imageUrl: ""
-})
+            setPreview("")
 
-        } catch(error) {
+        } catch (error) {
 
             console.error(error)
         }
     }
 
-    const deleteProduct =
-        async (id) => {
+    // DELETE PRODUCT
+    const deleteProduct = async (id) => {
 
         try {
 
-            await api.delete(
-                `/products/${id}`
-            )
+            await api.delete(`/products/${id}`)
 
             fetchProducts()
 
-        } catch(error) {
+        } catch (error) {
 
             console.error(error)
         }
@@ -95,112 +142,191 @@ function AdminProducts() {
 
     return (
 
-        <div className="p-10">
+        <div className="min-h-screen bg-gray-100 p-4 md:p-10">
 
-            <h1 className="text-4xl font-bold mb-10">
+            {/* TITLE */}
+            <div className="mb-10">
 
-                Product Management
+                <h1 className="text-3xl md:text-5xl font-bold text-gray-800">
 
-            </h1>
+                    Product Management
 
-            <div className="bg-white p-8 rounded-2xl shadow-xl mb-10 grid gap-5 max-w-xl">
+                </h1>
 
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Product Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="p-4 border rounded-xl"
-                />
+                <p className="text-gray-500 mt-2">
 
-                <input
-                    type="text"
-                    name="description"
-                    placeholder="Description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="p-4 border rounded-xl"
-                />
-                <input
-    type="text"
-    name="flavor"
-    placeholder="Flavor"
-    value={formData.flavor}
-    onChange={handleChange}
-    className="p-4 border rounded-xl"
-/>
+                    Add and manage your goli soda products
 
-                <input
-                    type="number"
-                    name="price"
-                    placeholder="Price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    className="p-4 border rounded-xl"
-                />
-
-                <input
-                    type="text"
-                    name="imageUrl"
-                    placeholder="Image URL"
-                    value={formData.imageUrl}
-                    onChange={handleChange}
-                    className="p-4 border rounded-xl"
-                />
-
-                <button
-                    onClick={addProduct}
-                    className="bg-green-600 text-white py-4 rounded-xl hover:bg-green-700">
-
-                    Add Product
-
-                </button>
+                </p>
 
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            {/* FORM */}
+            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-xl mb-12 max-w-2xl">
+
+                <div className="grid gap-5">
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Product Name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="p-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+
+                    <textarea
+                        name="description"
+                        placeholder="Description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="p-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+
+                    <input
+                        type="text"
+                        name="flavor"
+                        placeholder="Flavor"
+                        value={formData.flavor}
+                        onChange={handleChange}
+                        className="p-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+
+                    <input
+                        type="number"
+                        name="price"
+                        placeholder="Price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        className="p-4 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+
+                    {/* IMAGE UPLOAD */}
+                    <label className="border-2 border-dashed border-green-400 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-green-50 transition">
+
+                        <Upload
+                            size={40}
+                            className="text-green-600 mb-3"
+                        />
+
+                        <p className="font-semibold text-gray-700">
+
+                            Choose Product Image
+
+                        </p>
+
+                        <span className="text-sm text-gray-500 mt-1">
+
+                            JPG, PNG, WEBP
+
+                        </span>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                        />
+
+                    </label>
+
+                    {/* PREVIEW */}
+                    {
+                        preview && (
+
+                            <div className="mt-2">
+
+                                <img
+                                    src={preview}
+                                    alt="Preview"
+                                    className="w-full h-64 object-cover rounded-2xl shadow-md"
+                                />
+
+                            </div>
+                        )
+                    }
+
+                    {/* BUTTON */}
+                    <button
+                        onClick={addProduct}
+                        className="bg-green-600 hover:bg-green-700 transition text-white py-4 rounded-2xl flex items-center justify-center gap-3 font-semibold text-lg shadow-lg"
+                    >
+
+                        <PackagePlus size={22} />
+
+                        Add Product
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            {/* PRODUCTS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 {
                     products.map(product => (
 
                         <div
                             key={product.id}
-                            className="bg-white p-6 rounded-2xl shadow-xl">
+                            className="bg-white rounded-3xl overflow-hidden shadow-xl hover:scale-[1.02] transition"
+                        >
 
                             <img
-                                src={product.imageUrl}
+                                src={
+                                    product.imageUrl
+                                        ? `${BASE_URL}${product.imageUrl}`
+                                        : "https://placehold.co/600x400?text=No+Image"
+                                }
                                 alt={product.name}
-                                className="w-full h-56 object-cover rounded-xl mb-4"
+                                className="w-full h-64 object-cover"
+                                onError={(e) => {
+                                    e.target.src =
+                                        "https://placehold.co/600x400?text=Image+Error"
+                                }}
                             />
 
-                            <h2 className="text-2xl font-bold">
+                            <div className="p-6">
 
-                                {product.name}
+                                <h2 className="text-2xl font-bold text-gray-800">
 
-                            </h2>
+                                    {product.name}
 
-                            <p className="mt-2">
+                                </h2>
 
-                                {product.description}
+                                <p className="text-sm text-green-600 font-medium mt-1">
 
-                            </p>
+                                    {product.flavor}
 
-                            <p className="mt-3 font-bold text-green-600">
+                                </p>
 
-                                ₹ {product.price}
+                                <p className="mt-3 text-gray-600">
 
-                            </p>
+                                    {product.description}
 
-                            <button
-                                onClick={() =>
-                                    deleteProduct(product.id)
-                                }
-                                className="mt-5 bg-red-500 text-white px-5 py-2 rounded-lg">
+                                </p>
 
-                                Delete
+                                <p className="mt-4 text-2xl font-bold text-green-600">
 
-                            </button>
+                                    ₹ {product.price}
+
+                                </p>
+
+                                <button
+                                    onClick={() =>
+                                        deleteProduct(product.id)
+                                    }
+                                    className="mt-5 bg-red-500 hover:bg-red-600 transition text-white px-5 py-3 rounded-xl flex items-center gap-2"
+                                >
+
+                                    <Trash2 size={18} />
+
+                                    Delete
+
+                                </button>
+
+                            </div>
 
                         </div>
                     ))

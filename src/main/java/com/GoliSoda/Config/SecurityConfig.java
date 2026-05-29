@@ -27,14 +27,16 @@ public class SecurityConfig {
         http
            
             .csrf(csrf -> csrf.disable())
-
+            .cors(cors -> {})
             .authorizeHttpRequests(auth -> auth
             	.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/api/auth/**",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/upload",
+                    "/uploads/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/orders/**").permitAll()
@@ -57,7 +59,9 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
         	    "http://localhost:5173",
         	    "http://192.168.1.5:5173",  
-        	    "http://172.20.0.1:5173"
+        	    "http://172.20.0.1:5173",
+        	    "http://192.168.56.1:5173",
+        	    "http://172.28.128.1:5173"
         	));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
